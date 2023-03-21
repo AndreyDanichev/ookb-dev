@@ -1,6 +1,7 @@
 Thumbs.db
 *.DS_Store
 /front/.idea/
+/front/dist/
 /front/.DS_Store
 /front/node_modules/
 /back/node_modules/
