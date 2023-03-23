@@ -11,8 +11,8 @@ const workerPath = join(__dirname, "..", "helpers", "workers", "xlsx.js");
 
 export const createDocument = async (req, res) => {
   try {
-    const itemArr = req.body;
-    const result = (await Items.find({ name: { $in: itemArr } })).map(
+    const items = req.body;
+    const result = (await Items.find({ name: { $in: items.items } })).map(
       (e, idx) => {
         return {
           index: idx + 1,
@@ -21,7 +21,8 @@ export const createDocument = async (req, res) => {
       }
     );
     const data = {
-      items: result,
+      department: items.department,
+      items: [...result],
     };
     const worker = new Worker(workerPath, { workerData: data });
 

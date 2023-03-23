@@ -2,13 +2,17 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { ref, computed } from 'vue'
 import { inject } from 'vue';
+import departments from '../static/departments.json'
+
 const http = inject('$axios')
 
 const types = ref([])
 const items = ref([])
 const activeType = ref(undefined)
+const department = ref(undefined)
 let item = ''
 const selectedItems = ref([])
+
 types.value = (await http.get('types'))
 items.value = (await http.get('items'))
 
@@ -29,7 +33,11 @@ const deleteOne = (idx) => {
 
 const createRequest = () => {
 	if (selectedItems.value) {
-		http.post('/create-request', selectedItems.value, {
+		const dataToSave = {
+			department: department.value,
+			items: [...selectedItems.value]
+		}
+		http.post('/create-request', dataToSave, {
 			responseType: 'blob'
 		}).then((file) => {
 			const blob = new Blob([file], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -38,6 +46,9 @@ const createRequest = () => {
 			link.download = 'report.xlsx';
 			link.click();
 			URL.revokeObjectURL(link.href);
+			department.value = undefined
+			selectedItems.value.length = 0
+			activeType.value = undefined
 		})
 	}
 }
@@ -45,6 +56,11 @@ const createRequest = () => {
 </script>
 
 <template>
+	<span>Отделение:</span>
+	<select class="form-select" v-model="department" style="margin-bottom: 20px;">
+		<option :selected="el[0]" v-for="(el, idx) in departments.items" :key="idx">{{ el }}</option>
+	</select>
+	<span style="display: block; margin-top: 20px;">Категория:</span>
 	<select class="form-select" v-model="activeType" style="margin-bottom: 20px;">
 		<option :selected="el[0]" v-for="el in types" :key="el.id">{{ el.name }}</option>
 	</select>
